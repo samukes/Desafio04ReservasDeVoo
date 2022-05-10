@@ -5,64 +5,35 @@ defmodule Flightex.Users.AgentTest do
 
   alias Flightex.Users.Agent, as: UserAgent
 
+  setup do
+    UserAgent.start_link(%{})
+
+    :ok
+  end
+
   describe "save/1" do
-    setup do
-      UserAgent.start_link(%{})
+    test "when the user is saved, returns an UUID" do
+      {:ok, user_id} =
+        :user
+        |> build()
+        |> UserAgent.save()
 
-      id = UUID.uuid4()
-      cpf = "12345678900"
-
-      {:ok, id: id, cpf: cpf}
-    end
-
-    test "when the user is saves, returns an tuple", %{id: id, cpf: cpf} do
-      :users
-      |> build(id: id, cpf: cpf)
-      |> UserAgent.save()
-
-      response = UserAgent.get(cpf)
-
-
-      expected_response =
-        {:ok, %Flightex.Users.User{cpf: cpf, email: "jp@banana.com", id: id, name: "Jp"}}
-
-      assert response == expected_response
+      assert {:ok, _result} = UUID.info(user_id)
     end
   end
 
   describe "get/1" do
-    setup do
-      UserAgent.start_link(%{})
+    test "when the user is found, returns the user" do
+      {:ok, user_id} =
+        :user
+        |> build()
+        |> UserAgent.save()
 
-      id = UUID.uuid4()
-      cpf = "12345678900"
-
-      {:ok, id: id, cpf: cpf}
+      assert {:ok, _user} = UserAgent.get(user_id)
     end
 
-    test "when the user is found, returns the user", %{id: id, cpf: cpf} do
-      :users
-      |> build(id: id, cpf: cpf)
-      |> UserAgent.save()
-
-      response = UserAgent.get(cpf)
-
-      expected_response =
-        {:ok, %Flightex.Users.User{cpf: cpf, email: "jp@banana.com", id: id, name: "Jp"}}
-
-      assert response == expected_response
-    end
-
-    test "when the user is't founded, returns an error", %{id: id, cpf: cpf} do
-      :users
-      |> build(id: id, cpf: cpf)
-      |> UserAgent.save()
-
-      response = UserAgent.get("banana")
-
-      expected_response = {:error, "User not found"}
-
-      assert response == expected_response
+    test "when the user isn't found, returns an error" do
+      assert {:error, _reason} = UserAgent.get(UUID.uuid4())
     end
   end
 end
