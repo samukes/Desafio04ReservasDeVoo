@@ -4,61 +4,43 @@ defmodule Flightex.Bookings.AgentTest do
   import Flightex.Factory
 
   alias Flightex.Bookings.Agent, as: BookingsAgent
+  alias Flightex.Users.Agent, as: UsersAgent
+
+  setup do
+    BookingsAgent.start_link(%{})
+    UsersAgent.start_link(%{})
+
+    :ok
+  end
 
   describe "save/1" do
-    setup do
-      BookingsAgent.start_link(%{})
-
-      :ok
-    end
-
     test "when the param are valid, return a booking uuid" do
-      response =
+      user = build(:user)
+      user_id = user.id
+
+      {:ok, uuid} =
         :booking
-        |> build()
+        |> build(user_id: user_id)
         |> BookingsAgent.save()
 
-      {:ok, uuid} = response
-
-      assert response == {:ok, uuid}
+      assert {:ok, _result} = UUID.info(uuid)
     end
   end
 
   describe "get/1" do
-    setup do
-      BookingsAgent.start_link(%{})
+    test "when the booking is found, return a booking" do
+      user = build(:user)
 
-      {:ok, id: UUID.uuid4()}
-    end
-
-    test "when the user is found, return a booking", %{id: id} do
-      booking = build(:booking, id: id)
+      booking = build(:booking, user_id: user.id)
       {:ok, uuid} = BookingsAgent.save(booking)
 
-      response = BookingsAgent.get(uuid)
+      {:ok, booking} = BookingsAgent.get(uuid)
 
-      expected_response =
-        {:ok,
-         %Flightex.Bookings.Booking{
-           complete_date: ~N[2001-05-07 03:05:00],
-           id: id,
-           local_destination: "Bananeiras",
-           local_origin: "Brasilia",
-           user_id: "12345678900"
-         }}
-
-      assert response == expected_response
+      assert {:ok, _result} = UUID.info(booking.id)
     end
 
-    test "when the user wasn't found, returns an error", %{id: id} do
-      booking = build(:booking, id: id)
-      {:ok, _uuid} = BookingsAgent.save(booking)
-
-      response = BookingsAgent.get("banana")
-
-      expected_response = {:error, "Booking not found"}
-
-      assert response == expected_response
+    test "when the booking wasn't found, returns an error" do
+      assert {:error, _result} = BookingsAgent.get(UUID.uuid4())
     end
   end
 end

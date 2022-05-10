@@ -4,22 +4,26 @@ defmodule Flightex.Factory do
   alias Flightex.Bookings.Booking
   alias Flightex.Users.User
 
-  def users_factory do
-    %User{
-      id: UUID.uuid4(),
-      name: "Jp",
-      email: "jp@banana.com",
-      cpf: "12345678900"
-    }
+  def user_factory(params) do
+    User.build(
+      "Jp",
+      "jp@banana.com",
+      "12345678900"
+    )
+    |> get_map()
+    |> Map.merge(params)
   end
 
-  def booking_factory do
-    %Booking{
-      complete_date: ~N[2001-05-07 03:05:00],
-      local_origin: "Brasilia",
-      local_destination: "Bananeiras",
-      user_id: "12345678900",
-      id: UUID.uuid4()
-    }
+  def booking_factory(params) do
+    Booking.build(
+      NaiveDateTime.local_now(),
+      "Brasilia",
+      "Bananeiras",
+      ""
+    )
+    |> get_map()
+    |> Map.merge(params)
   end
+
+  defp get_map({:ok, map}), do: map
 end

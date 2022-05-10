@@ -5,16 +5,18 @@ defmodule Flightex.Bookings.BookingTest do
 
   describe "build/4" do
     test "when all params are valid, returns a booking" do
+      complete_date = NaiveDateTime.local_now()
+
       {:ok, response} =
         Booking.build(
-          ~N[2001-05-07 01:46:20],
+          complete_date,
           "Brasilia",
           "ilha das bananas",
           "12345678900"
         )
 
       expected_response = %Flightex.Bookings.Booking{
-        complete_date: ~N[2001-05-07 01:46:20],
+        complete_date: complete_date,
         id: response.id,
         local_destination: "ilha das bananas",
         local_origin: "Brasilia",
