@@ -30,5 +30,16 @@ defmodule Flightex.Bookings.CreateOrUpdateTest do
 
       assert {:ok, _uuid} = CreateOrUpdate.call(params)
     end
+
+    test "when user does not exist, returns error" do
+      params = %{
+        complete_date: NaiveDateTime.local_now(),
+        local_origin: "Brasilia",
+        local_destination: "Bananeiras",
+        user_id: UUID.uuid4()
+      }
+
+      assert {:error, _reason} = CreateOrUpdate.call(params)
+    end
   end
 end

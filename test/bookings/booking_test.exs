@@ -25,5 +25,17 @@ defmodule Flightex.Bookings.BookingTest do
 
       assert response == expected_response
     end
+
+    test "when complete_date is not NaiveDateTime" do
+      complete_date = "10/05/2022"
+
+      assert {:error, _reason} =
+               Booking.build(
+                 complete_date,
+                 "Brasilia",
+                 "ilha das bananas",
+                 "12345678900"
+               )
+    end
   end
 end
